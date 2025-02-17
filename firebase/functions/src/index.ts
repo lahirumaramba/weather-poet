@@ -1,16 +1,19 @@
-import { gemini20Flash, googleAI } from '@genkit-ai/googleai';
-import { genkit, z } from 'genkit';
-import { onCallGenkit } from 'firebase-functions/https';
-import { defineSecret } from 'firebase-functions/params';
+import {gemini20Flash, googleAI} from "@genkit-ai/googleai";
+import {genkit, z} from "genkit";
+import {onCallGenkit} from "firebase-functions/https";
+import {defineSecret} from "firebase-functions/params";
 
 const genAIApiKey = defineSecret("GOOGLE_GENAI_API_KEY");
 const weatherApiKey = defineSecret("WEATHER_API_KEY");
 const uid = defineSecret("UID");
 
 const options = {
-    method: 'GET',
-    headers: {accept: 'application/json', 'accept-encoding': 'deflate, gzip, br'}
-  };
+  method: "GET",
+  headers: {
+    "accept": "application/json",
+    "accept-encoding": "deflate, gzip, br",
+  },
+};
 
 const ai = genkit({
   plugins: [googleAI()],
@@ -22,7 +25,7 @@ const getWeather = async (location: string): Promise<any> => {
   try {
     const response = await fetch(weatherURL, options);
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`); // Throw error for non-2xx responses
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
     const weatherData = await response.json();
     return weatherData;
@@ -33,44 +36,56 @@ const getWeather = async (location: string): Promise<any> => {
 };
 
 const PoemSchema = z.object({
-    text: z.string(),
-    icon: z.string(),
-  });
+  text: z.string(),
+  icon: z.string(),
+});
+
+const InputSchema = z.object({
+  location: z.string(),
+  tone: z.string(),
+});
 
 const generatePoemFlow = ai.defineFlow(
   {
-    name: 'generatePoem',
-    inputSchema: z.string(),
+    name: "generatePoem",
+    inputSchema: InputSchema,
     outputSchema: PoemSchema,
   },
-  async (location: string) => {
-    let weatherInfo, weatherIcon;
+  async ({location, tone}) => {
+    let weatherInfo; let weatherIcon;
     try {
-      weatherInfo = await getWeather('Kitchener,Canada');
+      weatherInfo = await getWeather(location);
       weatherIcon = weatherInfo?.current?.condition?.icon;
     } catch (error) {
-      console.error('Error fetching or parsing wearher data:', error);
+      console.error("Error fetching or parsing wearher data:", error);
+      return {text: `Error: ${error}`, icon: "error"};
     }
-    const { text } = await ai.generate({
+    // Make it sound genz:
+    const {text} = await ai.generate({
       system: `You are a world famous poet.
-        Please use the provided weather data to write a short poem to describe the weather.
+        Please use the provided weather data to write a 
+        short poem to describe the weather.
         Use creative words. Keep it short and bright.
         Only respond with the poem and nothing else.`,
-      prompt: `Write a short poem to describe this weather: 
+      prompt: `Write a short poem to describe this weather.${
+        tone ? ` Make it sound ${tone}` : ""
+      }:
         \`\`\`json
         ${JSON.stringify(weatherInfo)}
         \`\`\``,
     });
-    return { text, icon: weatherIcon };
+    return {text, icon: weatherIcon};
   }
 );
 
 const authCallback = (auth: any, data: any): boolean => {
-    console.log(auth, data, uid.value());
-    return auth?.uid == uid.value()
-}
+  return auth?.uid == uid.value();
+};
 
-export const generatePoem = onCallGenkit({
-    secrets: [genAIApiKey],
+export const generatePoem = onCallGenkit(
+  {
+    secrets: [genAIApiKey, weatherApiKey, uid],
     authPolicy: authCallback,
-}, generatePoemFlow);
+  },
+  generatePoemFlow
+);
