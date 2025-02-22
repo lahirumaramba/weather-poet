@@ -1,7 +1,10 @@
 import {gemini20Flash, googleAI} from "@genkit-ai/googleai";
 import {genkit, z} from "genkit";
+import {enableFirebaseTelemetry} from "@genkit-ai/firebase";
 import {onCallGenkit} from "firebase-functions/https";
 import {defineSecret} from "firebase-functions/params";
+
+enableFirebaseTelemetry();
 
 const genAIApiKey = defineSecret("GOOGLE_GENAI_API_KEY");
 const weatherApiKey = defineSecret("WEATHER_API_KEY");
