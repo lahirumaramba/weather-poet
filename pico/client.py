@@ -2,6 +2,30 @@ import network
 import requests
 import json
 
+from epd4in2b_lib import EPD_4in2_B
+
+def updateScren(text):
+    epd = EPD_4in2_B()
+
+    from writer import Writer
+
+    import lbaskerv20 as font
+    import esteban20 as font2
+
+    epd.imageblack.fill(0xff)
+    epd.imagered.fill(0xff)
+
+    wri = Writer(epd.imageblack, font, True)
+    Writer.set_textpos(epd.imageblack, 10, 0)  # verbose = False to suppress console output
+    wri.printstring(text, True)
+
+    wri2 = Writer(epd.imageblack, font2, True)
+    Writer.set_textpos(epd.imageblack, 100, 0)  # verbose = False to suppress console output
+    wri2.printstring("A whisper of snow, a frigid kiss,\nNorthwest winds in chilling bliss.\nSun obscured, a cloudy hold,\nFourteen Fahrenheit, a winter's scold.\n", True)
+
+    epd.EPD_4IN2B_Display(epd.buffer_black, epd.buffer_red)
+    epd.Sleep()
+
 ssid = 'ssid'
 password = 'password'
 
