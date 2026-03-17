@@ -45,7 +45,7 @@ def button_b_handler(pin):
     if utime.ticks_diff(current_time, last_button_event_time) > DEBOUNCE_DELAY_MS:
         last_button_event_time = current_time
         print(f"Button B on pin {BUTTON_B_PIN} released!")
-        current_style_idx = 2#(current_style_idx + 1) % len(styles_list)
+        current_style_idx = (current_style_idx + 1) % len(styles_list)
         needs_update_b = True
 
 # Initialize the button pin with an internal pull-up resistor

@@ -1,8 +1,8 @@
-import {gemini20Flash, googleAI} from "@genkit-ai/googleai";
-import {genkit, z} from "genkit";
-import {enableFirebaseTelemetry} from "@genkit-ai/firebase";
-import {onCallGenkit} from "firebase-functions/https";
-import {defineSecret} from "firebase-functions/params";
+import { googleAI } from "@genkit-ai/google-genai";
+import { genkit, z } from "genkit";
+import { enableFirebaseTelemetry } from "@genkit-ai/firebase";
+import { onCallGenkit } from "firebase-functions/https";
+import { defineSecret } from "firebase-functions/params";
 
 enableFirebaseTelemetry();
 
@@ -20,10 +20,12 @@ const options = {
 
 const ai = genkit({
   plugins: [googleAI()],
-  model: gemini20Flash, // set default model
+  model: "googleai/gemini-2.5-flash", // set default model
 });
 
-const getWeather = async (location: string): Promise<any> => {
+const getWeather = async (
+  location: string
+): Promise<Record<string, unknown>> => {
   const weatherURL = `http://api.weatherapi.com/v1/current.json?key=${weatherApiKey.value()}&aqi=no&q=${location}`;
   try {
     const response = await fetch(weatherURL, options);
@@ -40,7 +42,14 @@ const getWeather = async (location: string): Promise<any> => {
 
 const PoemSchema = z.object({
   text: z.string(),
-  icon: z.string(),
+  name: z.string().optional(),
+  country: z.string().optional(),
+  last_updated: z.string().optional(),
+  temp_c: z.number().optional(),
+  condition_text: z.string().optional(),
+  wind_dir: z.string().optional(),
+  wind_kph: z.number().optional(),
+  feelslike_c: z.number().optional(),
 });
 
 const InputSchema = z.object({
@@ -54,34 +63,47 @@ const generatePoemFlow = ai.defineFlow(
     inputSchema: InputSchema,
     outputSchema: PoemSchema,
   },
-  async ({location, tone}) => {
-    let weatherInfo; let weatherIcon;
+  async ({ location, tone }) => {
+    let weatherInfo;
     try {
       weatherInfo = await getWeather(location);
-      weatherIcon = weatherInfo?.current?.condition?.icon;
     } catch (error) {
       console.error("Error fetching or parsing wearher data:", error);
-      return {text: `Error: ${error}`, icon: "error"};
+      return { text: `Error: ${error}` };
     }
     // Make it sound genz:
-    const {text} = await ai.generate({
+    const { text } = await ai.generate({
       system: `You are a world famous poet.
         Please use the provided weather data to write a 
         short poem to describe the weather.
         Use creative words. Keep it short and bright.
         Only respond with the poem and nothing else.`,
-      prompt: `Write a short poem to describe this weather.${
-        tone ? ` Make it sound ${tone}` : ""
-      }:
+      prompt: `Write a short poem to describe this weather.${tone ? ` Make it sound ${tone}` : ""
+        }:
         \`\`\`json
         ${JSON.stringify(weatherInfo)}
         \`\`\``,
     });
-    return {text, icon: weatherIcon};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const info = weatherInfo as any;
+    return {
+      text,
+      name: info?.location?.name,
+      country: info?.location?.country,
+      last_updated: info?.current?.last_updated,
+      temp_c: info?.current?.temp_c,
+      condition_text: info?.current?.condition?.text,
+      wind_dir: info?.current?.wind_dir,
+      wind_kph: info?.current?.wind_kph,
+      feelslike_c: info?.current?.feelslike_c,
+    };
   }
 );
 
-const authCallback = (auth: any, data: any): boolean => {
+const authCallback = (
+  auth?: { uid: string } | null,
+  _data?: unknown
+): boolean => {
   return auth?.uid == uid.value();
 };
 

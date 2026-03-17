@@ -71,3 +71,5 @@ node_modules/
 .genkit/
 
 .DS_Store
+
+logs.json

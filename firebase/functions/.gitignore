@@ -9,3 +9,7 @@ typings/
 node_modules/
 *.local
 genkit/
+
+skills-lock.json
+.agents/
+.agent/
