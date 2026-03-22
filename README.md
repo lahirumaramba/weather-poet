@@ -2,7 +2,7 @@
 
 Weather Poet is a charming IoT project that transforms real-time weather data into atmospheric poetry, displayed on a beautiful 3-color e-Ink screen.
 
-[Watch the video](https://www.youtube.com/watch?v=61_UXqVG5D0&list=PLIUz3-TvQRfU-pb-r6WZ-icGGzmVGv1Sr&index=4)
+## Watch the [Video on YouTube](https://www.youtube.com/watch?v=61_UXqVG5D0&list=PLIUz3-TvQRfU-pb-r6WZ-icGGzmVGv1Sr&index=4)
 
 ![Weather Poet Demo](pico/demo_ui/weather_poet.jpg)
 
@@ -66,3 +66,6 @@ The backend uses **Firebase Genkit** to handle AI generation and weather API cal
 - **Initial Boot**: On startup, the device connects to WiFi and fetches the current weather poem.
 - **Button A**: Manually trigger a fresh weather update and poem generation.
 - **Button B**: Instantly cycle through the available UI styles (Modern, Broadsheet, Minimalist, Book) using cached data.
+
+## 3D Models
+[Weather Poet 3D Enclosure](https://makerworld.com/en/models/2559342-weather-poet-3d-enclosure#profileId-2819813)
