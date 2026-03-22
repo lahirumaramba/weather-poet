@@ -2,6 +2,8 @@
 
 Weather Poet is a charming IoT project that transforms real-time weather data into atmospheric poetry, displayed on a beautiful 3-color e-Ink screen.
 
+[Watch the video](https://www.youtube.com/watch?v=61_UXqVG5D0&list=PLIUz3-TvQRfU-pb-r6WZ-icGGzmVGv1Sr&index=4)
+
 ![Weather Poet Demo](pico/demo_ui/weather_poet.jpg)
 
 ## Features
