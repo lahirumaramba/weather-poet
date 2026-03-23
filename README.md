@@ -69,3 +69,6 @@ The backend uses **Firebase Genkit** to handle AI generation and weather API cal
 
 ## 3D Models
 [Weather Poet 3D Enclosure](https://makerworld.com/en/models/2559342-weather-poet-3d-enclosure#profileId-2819813)
+
+## Writer
+- The `pico/writer.py` class is from https://github.com/peterhinch/micropython-font-to-py
